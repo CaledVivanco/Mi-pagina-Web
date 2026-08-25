@@ -1,112 +1,1331 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="Captura de pantalla 2025-01-16 164528.png" type="image/x-icon">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caled Vivanco · Desarrollo Web a la medida</title>
+<meta name="description" content="Caled Vivanco, Ingeniero de Sistemas. Creación de páginas web personales y de negocio, únicas y a la medida.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS — sistema de diseño "Terminal / Compilador"
+   ============================================================ */
+:root{
+  --bg: #090c11;
+  --bg-alt: #0c1119;
+  --surface: #11161f;
+  --surface-2: #171e2a;
+  --border: #232c3b;
+  --text: #e9eef5;
+  --text-dim: #8791a3;
+  --text-faint: #556072;
+  --accent: #8b6bff;       /* violeta índigo */
+  --accent-soft: #8b6bff33;
+  --accent-2: #22d3c0;     /* teal */
+  --accent-2-soft: #22d3c033;
+  --warn: #ffb454;         /* ámbar — highlight puntual */
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --radius: 10px;
+  --maxw: 1160px;
+}
 
-  <title>Tu Negocio Web</title>
-  <link rel="stylesheet" href="blog.css">
-  <script src="blog.js"></script>
-  <meta name="description" content="Creamos páginas web personalizadas y modernas para tu negocio. Ofrecemos servicios de diseño web, optimización SEO, y desarrollo profesional.">
-  <meta name="keywords" content="diseño web, SEO, páginas web profesionales, desarrollo web, tráfico orgánico, marketing digital">
-  <meta name="author" content="Tu Negocio Web">
-  <meta name="robots" content="index, follow">
-  <meta property="og:title" content="Tu Negocio Web - Servicios de Diseño y SEO">
-  <meta property="og:description" content="Transformamos tus ideas en páginas web atractivas y optimizadas para destacar en internet. ¡Conoce nuestros servicios!">
-  <meta property="og:image" content="URL_DE_LA_IMAGEN_PRINCIPAL">
-  <meta property="og:url" content="URL_DE_TU_PAGINA">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Tu Negocio Web - Diseño y SEO Profesional">
-  <meta name="twitter:description" content="Creamos páginas web modernas, funcionales y optimizadas para buscadores. ¡Solicita información ahora!">
-  <meta name="twitter:image" content="URL_DE_LA_IMAGEN_PRINCIPAL">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=TU_ID_DE_ANALYTICS"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'TU_ID_DE_ANALYTICS');
-  </script>
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection{ background: var(--accent); color: #0a0a0a; }
+a{ color: inherit; text-decoration: none; }
+ul{ list-style: none; }
+img,svg{ display:block; max-width:100%; }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior:auto !important; }
+}
+
+.wrap{ max-width: var(--maxw); margin: 0 auto; padding: 0 28px; }
+.mono{ font-family: var(--font-mono); }
+
+/* ============================================================
+   FONDO — cascada de números binarios (canvas, estilo ambiental)
+   ============================================================ */
+#binary-rain{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.grain-overlay{
+  position: fixed; inset:0; z-index:1; pointer-events:none;
+  background: radial-gradient(ellipse at 50% 0%, transparent 0%, var(--bg) 92%);
+  mix-blend-mode: normal;
+}
+.cursor-glow{
+  position: fixed;
+  width: 420px; height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  transform: translate(-50%,-50%);
+  transition: opacity .4s ease;
+  filter: blur(10px);
+}
+
+/* ============================================================
+   BARRA DE PROGRESO DE SCROLL
+   ============================================================ */
+#scroll-progress{
+  position: fixed; top:0; left:0; height:2px; width:0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--warn));
+  z-index: 200; pointer-events:none;
+  box-shadow: 0 0 12px var(--accent-soft);
+}
+
+/* ============================================================
+   CURSOR CUSTOM — punto + anillo con interpolación (lerp)
+   ============================================================ */
+.cursor-dot,.cursor-ring{
+  position: fixed; top:0; left:0; pointer-events:none; z-index:300;
+  border-radius:50%; opacity:0;
+}
+.cursor-dot{
+  width:6px; height:6px; background: var(--accent-2);
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 10px var(--accent-2);
+}
+.cursor-ring{
+  width:36px; height:36px;
+  border:1.5px solid var(--accent);
+  transform: translate(-50%,-50%);
+  transition: width .28s ease, height .28s ease, border-color .28s ease, background-color .28s ease;
+  mix-blend-mode: screen;
+}
+.cursor-ring.is-hovering{
+  width:58px; height:58px;
+  background: var(--accent-soft);
+  border-color: transparent;
+}
+@media (pointer:fine){
+  body.cursor-hidden, body.cursor-hidden *{ cursor: none !important; }
+}
+@media (pointer:coarse){
+  .cursor-dot,.cursor-ring{ display:none; }
+}
+
+/* ============================================================
+   PRELOADER — "decodificando"
+   ============================================================ */
+#preloader{
+  position: fixed; inset:0; z-index: 999;
+  background: var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction: column;
+  gap: 14px;
+  transition: opacity .6s ease, visibility .6s ease;
+}
+#preloader.hide{ opacity:0; visibility:hidden; }
+.pre-line{
+  font-family: var(--font-mono);
+  font-size: clamp(14px, 3vw, 20px);
+  color: var(--accent-2);
+  letter-spacing: 2px;
+}
+.pre-pct{
+  font-family: var(--font-mono);
+  font-size: 12px; color: var(--text-faint);
+  letter-spacing: 3px;
+}
+.pre-bar{
+  width: 220px; height: 2px; background: var(--border);
+  position: relative; overflow:hidden; border-radius: 2px;
+}
+.pre-bar span{
+  position:absolute; left:0; top:0; height:100%; width:0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  animation: loadbar 1.4s ease forwards;
+}
+@keyframes loadbar{ to{ width:100%; } }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+header{
+  position: fixed; top:0; left:0; right:0; z-index: 100;
+  backdrop-filter: blur(14px) saturate(140%);
+  background: rgba(9,12,17,0.55);
+  border-bottom: 1px solid var(--border);
+  transition: background .3s ease;
+}
+.nav{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 16px 28px;
+  max-width: var(--maxw); margin:0 auto;
+}
+.logo{
+  font-family: var(--font-mono);
+  font-weight:700; font-size: 18px;
+  color: var(--text);
+  display:flex; align-items:center; gap:2px;
+}
+.logo .cur{
+  display:inline-block; width:9px; height:18px; background: var(--accent-2);
+  margin-left:4px; animation: blink 1s step-end infinite;
+}
+@keyframes blink{ 50%{ opacity:0; } }
+.navlinks{ display:flex; gap: 36px; }
+.navlinks a{
+  font-family: var(--font-mono);
+  font-size: 13px; color: var(--text-dim);
+  position: relative; padding: 4px 0;
+  transition: color .25s ease;
+}
+.navlinks a::before{ content:'// '; color: var(--text-faint); }
+.navlinks a::after{
+  content:''; position:absolute; left:0; bottom:-3px; width:0; height:1px;
+  background: var(--accent-2); transition: width .3s ease;
+}
+.navlinks a:hover{ color: var(--text); }
+.navlinks a:hover::after{ width:100%; }
+
+.nav-cta{
+  font-family: var(--font-mono); font-size: 12px; font-weight:700;
+  padding: 9px 16px; border-radius: 6px;
+  background: var(--accent-2); color: #04120f;
+  display:flex; align-items:center; gap:8px;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.nav-cta:hover{ transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-2-soft); }
+
+.burger{ display:none; flex-direction:column; gap:5px; cursor:pointer; z-index:120; }
+.burger span{ width:24px; height:2px; background: var(--text); transition: all .3s ease; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{
+  position: relative; z-index: 5;
+  min-height: 100vh;
+  display:flex; align-items:center;
+  padding: 140px 0 80px;
+}
+.hero-grid{
+  display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items:center;
+  width:100%;
+}
+.tag-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--accent-2);
+  border: 1px solid var(--border); padding: 6px 12px; border-radius: 30px;
+  background: var(--surface);
+  opacity:0; animation: fadeUp .7s ease forwards; animation-delay: .1s;
+}
+.tag-pill .dot{ width:7px; height:7px; border-radius:50%; background: var(--accent-2); animation: pulse 1.6s ease infinite; }
+@keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:.4; transform:scale(1.4);} }
+
+.hero h1{
+  font-family: var(--font-mono);
+  font-size: clamp(34px, 5.4vw, 64px);
+  line-height: 1.08;
+  margin: 22px 0 20px;
+  opacity:0; animation: fadeUp .7s ease forwards; animation-delay:.22s;
+}
+.hero h1 .accent{ color: var(--accent-2); }
+
+/* glitch sobre el acento del título */
+.hero h1 .glitch{ position: relative; display:inline-block; }
+.hero h1 .glitch::before,
+.hero h1 .glitch::after{
+  content: attr(data-text);
+  position: absolute; left:0; top:0; width:100%; height:100%;
+  pointer-events:none;
+}
+.hero h1 .glitch::before{ color: var(--accent); transform: translate(2px,-1px); opacity:0; }
+.hero h1 .glitch::after { color: var(--warn);    transform: translate(-2px,1px); opacity:0; }
+.hero h1 .glitch:hover::before{ animation: glitch-a .6s steps(2) infinite; }
+.hero h1 .glitch:hover::after { animation: glitch-b .6s steps(2) infinite; }
+@keyframes glitch-a{
+  0%,100%{ opacity:0; transform: translate(2px,-1px); }
+  25%{ opacity:.85; transform: translate(-3px,2px); clip-path: inset(20% 0 55% 0); }
+  50%{ opacity:.85; transform: translate(3px,1px); clip-path: inset(60% 0 10% 0); }
+  75%{ opacity:.6; transform: translate(-2px,-2px); }
+}
+@keyframes glitch-b{
+  0%,100%{ opacity:0; transform: translate(-2px,1px); }
+  30%{ opacity:.85; transform: translate(3px,-2px); clip-path: inset(50% 0 25% 0); }
+  55%{ opacity:.85; transform: translate(-3px,2px); clip-path: inset(5% 0 80% 0); }
+  80%{ opacity:.6; transform: translate(2px,-1px); }
+}
+
+/* scanline tipo CRT que barre el hero */
+.scanline{
+  position:absolute; left:0; right:0; height:140px; top:-40%;
+  background: linear-gradient(180deg, transparent, rgba(139,107,255,.09) 45%, transparent);
+  pointer-events:none;
+  animation: scanmove 7s linear infinite;
+}
+@keyframes scanmove{ 0%{ top:-40%; } 100%{ top:110%; } }
+.hero p.lead{
+  color: var(--text-dim); font-size: 17px; max-width: 480px; margin-bottom: 34px;
+  opacity:0; animation: fadeUp .7s ease forwards; animation-delay:.34s;
+}
+.hero-actions{ display:flex; gap:16px; flex-wrap:wrap; opacity:0; animation: fadeUp .7s ease forwards; animation-delay:.46s; }
+@keyframes fadeUp{ from{ opacity:0; transform: translateY(18px);} to{ opacity:1; transform:translateY(0);} }
+
+.btn{
+  font-family: var(--font-mono); font-size: 14px; font-weight:700;
+  padding: 14px 26px; border-radius: 8px; display:inline-flex; align-items:center; gap:10px;
+  transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+  border: 1px solid transparent; cursor:pointer;
+  position:relative; overflow:hidden;
+}
+.ripple{
+  position:absolute; border-radius:50%; pointer-events:none;
+  background: rgba(255,255,255,.4); transform: scale(0);
+  animation: ripple .65s ease-out forwards;
+}
+@keyframes ripple{ to{ transform: scale(2.8); opacity:0; } }
+.btn-primary{ background: var(--accent-2); color:#04120f; }
+.btn-primary:hover{ transform: translateY(-3px); box-shadow: 0 10px 30px var(--accent-2-soft); }
+.btn-ghost{ border-color: var(--border); color: var(--text); background: var(--surface); }
+.btn-ghost:hover{ border-color: var(--accent); transform: translateY(-3px); }
+
+/* terminal card - elemento firma */
+.term-card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,.6);
+  opacity:0; animation: fadeUp .8s ease forwards; animation-delay: .3s;
+  transition: transform .4s ease, box-shadow .4s ease;
+  position: relative;
+}
+.term-card::after{
+  content:''; position:absolute; inset:-1px; border-radius:13px; padding:1px;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2), var(--warn), var(--accent));
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: borderflow 5s linear infinite;
+  opacity:.45; pointer-events:none;
+}
+@keyframes borderflow{ 0%{ background-position:0% 50%; } 100%{ background-position:300% 50%; } }
+.term-card:hover{ transform: translateY(-6px); box-shadow: 0 44px 100px -24px rgba(139,107,255,.3); }
+.term-top{
+  display:flex; align-items:center; gap:8px;
+  padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border);
+  border-radius: 12px 12px 0 0;
+}
+.term-top span{ width:11px; height:11px; border-radius:50%; }
+.term-top span:nth-child(1){ background:#ff5f57; }
+.term-top span:nth-child(2){ background:#febc2e; }
+.term-top span:nth-child(3){ background:#28c840; }
+.term-top small{ margin-left:auto; font-family: var(--font-mono); font-size:11px; color: var(--text-faint); }
+.term-body{ padding: 22px 20px; font-family: var(--font-mono); font-size: 13.5px; min-height: 240px; }
+.term-body .ln{ color: var(--text-faint); margin-right:10px; }
+.term-body .cmd{ color: var(--accent-2); }
+.term-body .out{ color: var(--text-dim); margin: 6px 0 14px 20px; }
+.term-body .path{ color: var(--warn); }
+#typed-line{ color: var(--text); }
+.type-cursor{ display:inline-block; width:8px; height:15px; background: var(--accent-2); margin-left:2px; animation: blink 1s step-end infinite; vertical-align: middle; }
+
+/* ============================================================
+   MARQUEE
+   ============================================================ */
+.marquee-wrap{
+  position: relative; z-index:5;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  background: var(--surface); overflow: hidden; padding: 16px 0;
+}
+.marquee-wrap::before,.marquee-wrap::after{
+  content:''; position:absolute; top:0; bottom:0; width:90px; z-index:2; pointer-events:none;
+}
+.marquee-wrap::before{ left:0; background: linear-gradient(90deg, var(--surface), transparent); }
+.marquee-wrap::after{ right:0; background: linear-gradient(-90deg, var(--surface), transparent); }
+.marquee-wrap:hover .marquee{ animation-play-state: paused; }
+.marquee{ display:flex; gap: 50px; width: max-content; animation: scroll-left 26s linear infinite; }
+.marquee span{ font-family: var(--font-mono); font-size: 13px; color: var(--text-dim); white-space:nowrap; display:flex; align-items:center; gap:12px; }
+.marquee span b{ color: var(--accent-2); font-weight:700; }
+@keyframes scroll-left{ from{ transform: translateX(0);} to{ transform: translateX(-50%);} }
+
+/* ============================================================
+   SECCIONES GENERALES
+   ============================================================ */
+section{ position: relative; z-index: 5; padding: 110px 0; }
+.eyebrow{
+  font-family: var(--font-mono); font-size: 12px; color: var(--accent-2);
+  letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px;
+  display:flex; align-items:center; gap:10px;
+}
+.eyebrow::before{ content:''; width:26px; height:1px; background: var(--accent-2); }
+h2.h-title{
+  font-family: var(--font-mono); font-size: clamp(26px, 4vw, 40px);
+  max-width: 640px; margin-bottom: 18px;
+}
+.section-lead{ color: var(--text-dim); max-width: 560px; font-size: 15.5px; }
+
+.reveal{
+  opacity:0; transform: translateY(28px); filter: blur(6px);
+  transition: opacity .7s ease, transform .7s ease, filter .7s ease;
+  will-change: transform, opacity, filter;
+}
+.reveal.in{ opacity:1; transform: translateY(0); filter: blur(0); }
+
+/* ---- sobre mi ---- */
+.about-grid{ display:grid; grid-template-columns: 0.9fr 1.1fr; gap: 60px; align-items:start; margin-top: 50px; }
+.about-card{
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--radius);
+  padding: 26px; font-family: var(--font-mono); font-size: 13px; color: var(--text-dim);
+}
+.about-card .row{
+  display:flex; justify-content:space-between; padding: 10px 0; border-bottom: 1px dashed var(--border);
+  opacity:0; transform: translateX(-12px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.about-card.in .row{ opacity:1; transform:none; }
+.about-card.in .row:nth-child(1){ transition-delay:.06s; }
+.about-card.in .row:nth-child(2){ transition-delay:.12s; }
+.about-card.in .row:nth-child(3){ transition-delay:.18s; }
+.about-card.in .row:nth-child(4){ transition-delay:.24s; }
+.about-card.in .row:nth-child(5){ transition-delay:.3s; }
+.about-card .row:last-child{ border-bottom:none; }
+.about-card .k{ color: var(--text-faint); }
+.about-card .v{ color: var(--text); }
+.about-text p{ color: var(--text-dim); margin-bottom: 16px; font-size: 15.5px; }
+.about-text strong{ color: var(--text); font-weight:600; }
+
+/* ---- servicios ---- */
+.services-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 50px; }
+.service-card{
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 30px 26px; position: relative; overflow:hidden;
+  transition: transform .35s ease, border-color .35s ease;
+  transform-style: preserve-3d; will-change: transform;
+}
+.service-card::after{
+  content:''; position:absolute; inset:0; border-radius: var(--radius);
+  background: radial-gradient(560px circle at var(--mx,50%) var(--my,50%), rgba(139,107,255,.16), transparent 42%);
+  opacity:0; transition: opacity .3s ease; pointer-events:none;
+}
+.service-card:hover::after{ opacity:1; }
+.service-card h3,.service-card p,.svc-icon{ transform: translateZ(22px); }
+.service-card::before{
+  content:''; position:absolute; inset:0; border-radius: var(--radius); padding:1px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity:0; transition: opacity .35s ease;
+}
+.service-card:hover{ transform: translateY(-8px); }
+.service-card:hover::before{ opacity:1; }
+.svc-icon{
+  width: 46px; height:46px; border-radius: 10px;
+  background: var(--surface-2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; margin-bottom: 20px;
+  color: var(--accent-2);
+}
+.service-card h3{ font-family: var(--font-mono); font-size: 17px; margin-bottom: 10px; }
+.service-card p{ color: var(--text-dim); font-size: 14px; }
+.svc-tag{
+  margin-top:16px; display:inline-block; font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-faint); border:1px solid var(--border); padding: 4px 10px; border-radius: 20px;
+}
+
+/* ---- proceso ---- */
+.process-track{ position: relative; margin-top: 60px; }
+.process-track::before{
+  content:''; position:absolute; top: 26px; left:0; right:0; height:1px;
+  background: var(--border);
+}
+.process-track::after{
+  content:''; position:absolute; top:26px; left:0; height:1px; width:0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 1.2s ease;
+}
+.process-track.in::after{ width: 100%; }
+.process-grid{ display:grid; grid-template-columns: repeat(4,1fr); gap: 24px; position: relative; }
+.process-step{ opacity:0; transform: translateY(22px); transition: opacity .55s ease, transform .55s ease; }
+.process-track.in .process-step{ opacity:1; transform:none; }
+.process-track.in .process-step:nth-child(2){ transition-delay:.12s; }
+.process-track.in .process-step:nth-child(3){ transition-delay:.24s; }
+.process-track.in .process-step:nth-child(4){ transition-delay:.36s; }
+.process-step .num{
+  font-family: var(--font-mono); font-size: 13px; color: var(--bg);
+  background: var(--accent-2); width: 52px; height:52px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; margin-bottom: 20px;
+  border: 4px solid var(--bg); font-weight:700;
+  transition: background .3s ease, color .3s ease, transform .3s ease;
+}
+.process-step:hover .num{ background: var(--accent); color:#fff; transform: scale(1.12) rotate(8deg); }
+.process-step h4{ font-family: var(--font-mono); font-size: 15px; margin-bottom: 8px; }
+.process-step p{ color: var(--text-dim); font-size: 13.5px; }
+
+/* ---- 
+ ---- */
+.folio-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-top: 50px; perspective: 1200px; }
+folio-card{
+  aspect-ratio: 4/3; border-radius: var(--radius);
+  border: 1.5px dashed var(--border);
+  background: var(--surface);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  text-align:center; padding: 24px;
+  transition: border-color .3s ease, transform .3s ease;
+}
+.folio-card:hover{ border-color: var(--accent-2); transform: translateY(-4px); }
+.folio-card .plus{
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; color: var(--text-faint); font-size: 20px;
+}
+.folio-card small{ font-family: var(--font-mono); color: var(--text-faint); font-size: 12px; max-width: 200px; }
+
+.folio-card.has-img{
+  border-style: solid; padding: 0; overflow: hidden; position: relative; cursor: pointer;
+  transform-style: preserve-3d; will-change: transform;
+}
+.folio-card.has-img video{
+  width:100%; height:100%; object-fit: cover; object-position: top;
+  transition: transform .7s cubic-bezier(.2,.6,.2,1), filter .7s ease;
+  filter: saturate(.82) contrast(1.02);
+  background: var(--bg);
+}
+.folio-card.has-img:hover video{ transform: scale(1.08); filter: saturate(1.15); }
+.folio-card.has-img::after{
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(420px circle at var(--mx,50%) var(--my,50%), rgba(139,107,255,.2), transparent 45%);
+  opacity:0; transition: opacity .3s ease; pointer-events:none;
+}
+.folio-card.has-img:hover::after{ opacity:1; }
+.play-badge{
+  position:absolute; top:50%; left:50%; transform: translate(-50%,-50%) scale(.5);
+  width:66px; height:66px; border-radius:50%;
+  background: rgba(9,12,17,.6); backdrop-filter: blur(10px);
+  border:1px solid var(--accent-2);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--accent-2); opacity:0; transition: all .4s cubic-bezier(.2,.8,.3,1.3);
+  z-index:3; box-shadow: 0 0 30px rgba(34,211,192,.35);
+}
+.folio-card.has-img:hover .play-badge{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+.play-badge svg{ width:24px; height:24px; margin-left:2px; }
+.folio-caption{
+  position:absolute; left:0; right:0; bottom:0; padding: 16px 18px;
+  background: linear-gradient(180deg, transparent, rgba(9,12,17,0.95) 70%);
+  display:flex; flex-direction:column; gap:2px;
+  transform: translateY(6px); opacity: .92; transition: transform .35s ease;
+}
+.folio-card.has-img:hover .folio-caption{ transform: translateY(0); }
+.folio-caption b{ font-family: var(--font-mono); font-size: 13.5px; color: var(--text); }
+.folio-caption span{ font-family: var(--font-mono); font-size: 11px; color: var(--accent-2); }
+
+/* ---- modal reproductor de video ---- */
+.video-modal{
+  position: fixed; inset:0; z-index:400;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; visibility:hidden; transition: opacity .35s ease, visibility .35s ease;
+}
+.video-modal.open{ opacity:1; visibility:visible; }
+.video-modal .vm-backdrop{
+  position:absolute; inset:0;
+  background: rgba(4,6,10,.88); backdrop-filter: blur(16px);
+}
+.video-modal .vm-box{
+  position:relative; z-index:2; width:min(920px, 92vw);
+  background: var(--surface); border:1px solid var(--border); border-radius:14px;
+  overflow:hidden;
+  transform: scale(.92) translateY(24px);
+  transition: transform .45s cubic-bezier(.2,.7,.3,1.08);
+  box-shadow: 0 50px 140px -30px rgba(0,0,0,.85);
+}
+.video-modal.open .vm-box{ transform: scale(1) translateY(0); }
+.vm-head{
+  display:flex; align-items:center; gap:12px;
+  padding: 14px 18px; border-bottom:1px solid var(--border); background: var(--surface-2);
+}
+.vm-head b{ font-family: var(--font-mono); font-size: 13px; color: var(--text); }
+.vm-head small{ font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); margin-left:auto; letter-spacing:1px; }
+.vm-close{
+  width:32px; height:32px; border-radius:8px; border:none; cursor:pointer;
+  background: var(--border); color: var(--text); font-size:16px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  transition: background .25s ease, transform .3s ease, color .25s ease;
+}
+.vm-close:hover{ background: var(--accent); color:#0a0a0a; transform: rotate(90deg); }
+.vm-stage{ position:relative; }
+.video-modal video{
+  width:100%; aspect-ratio:16/9; display:block; background:#000;
+}
+.vm-fallback{
+  aspect-ratio:16/9; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  background: var(--bg); color: var(--text-faint);
+  font-family: var(--font-mono); font-size: 13px; text-align:center; padding: 30px;
+}
+.vm-fallback img{ max-height:120px; border-radius:8px; border:1px solid var(--border); opacity:.85; }
+.vm-fallback code{ color: var(--accent-2); }
+
+/* ---- contacto ---- */
+.contact-wrap{
+  margin-top: 50px; background: var(--surface); border:1px solid var(--border);
+  border-radius: 16px; padding: 54px; display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 50px;
+  position: relative; overflow:hidden;
+}
+.contact-wrap::before{
+  content:''; position:absolute; width:400px; height:400px; border-radius:50%;
+  background: radial-gradient(circle, var(--accent-soft), transparent 70%);
+  top:-150px; right:-100px; pointer-events:none;
+}
+.contact-left h3{ font-family: var(--font-mono); font-size: 26px; margin-bottom: 16px; }
+.contact-left p{ color: var(--text-dim); margin-bottom: 28px; max-width: 420px; }
+.whatsapp-btn{
+  display:inline-flex; align-items:center; gap:12px;
+  background: #22d3c0; color:#04120f; font-family: var(--font-mono); font-weight:700;
+  padding: 16px 26px; border-radius: 10px; font-size: 15px;
+  transition: transform .25s ease, box-shadow .25s ease;
+  position:relative; overflow:hidden;
+}
+.whatsapp-btn:hover{ transform: translateY(-3px); box-shadow: 0 12px 30px var(--accent-2-soft); }
+.whatsapp-btn svg{ width:22px; height:22px; }
+
+.social-list{ display:flex; flex-direction:column; gap:2px; justify-content:center; }
+.social-item{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 16px 4px; border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 14px; color: var(--text-dim);
+  transition: color .25s ease, padding-left .25s ease;
+}
+.social-item:hover{ color: var(--text); padding-left: 8px; }
+.social-item span.arrow{ opacity:0; transition: opacity .25s ease; color: var(--accent-2); }
+.social-item:hover span.arrow{ opacity:1; }
+
+/* ---- footer ---- */
+footer{ position:relative; z-index:5; border-top: 1px solid var(--border); padding: 34px 0; }
+.footer-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; }
+.footer-row p{ font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); }
+
+/* ---- whatsapp flotante ---- */
+.float-wa{
+  position: fixed; bottom: 26px; right: 26px; z-index: 90;
+  width: 58px; height:58px; border-radius: 50%;
+  background: #22d3c0; display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 10px 30px rgba(34,211,192,.4);
+  animation: floatpulse 2.4s ease infinite;
+}
+.float-wa svg{ width:28px; height:28px; color:#04120f; }
+@keyframes floatpulse{
+  0%,100%{ box-shadow: 0 10px 30px rgba(34,211,192,.35); }
+  50%{ box-shadow: 0 10px 42px rgba(34,211,192,.65); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 980px){
+  .hero-grid, .about-grid{ grid-template-columns: 1fr; }
+  .services-grid, .folio-grid{ grid-template-columns: repeat(2,1fr); }
+  .process-grid{ grid-template-columns: repeat(2,1fr); }
+  .contact-wrap{ grid-template-columns: 1fr; padding: 34px; }
+  .process-track::before, .process-track::after{ display:none; }
+}
+@media (max-width: 720px){
+  .navlinks{ position: fixed; top:0; right:0; height:100vh; width: 74%; max-width:300px;
+    background: var(--bg-alt); border-left:1px solid var(--border);
+    flex-direction: column; padding: 100px 32px; gap: 26px;
+    transform: translateX(100%); transition: transform .4s ease; z-index: 110; }
+  .navlinks.open{ transform: translateX(0); }
+  .burger{ display:flex; }
+  .nav-cta{ display:none; }
+  .services-grid, .folio-grid{ grid-template-columns: 1fr; }
+  .process-grid{ grid-template-columns: 1fr; }
+}
+</style>
 </head>
 <body>
-  <!-- Contenedor para los números binarios animados -->
-  <div id="binary-bg"></div> <!-- Este es el contenedor para la animación binaria -->
 
-  
-  <header>
-    <nav>
-      <ul>
-        <li><a href="#inicio">Inicio</a></li>
-        <li><a href="#servicios">Servicios</a></li>
-        <li><a href="#portafolio">Portafolio</a></li>
-        <li><a href="#contacto">Contacto</a></li>
-      </ul>
-    </nav>
-  </header>
+<div id="scroll-progress"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
 
-  <section id="inicio" class="hero">
-    <h1>Transforma tus Ideas en una Página Web Profesional</h1>
-    <p>¡Te ayudo a crear páginas web modernas y atractivas para tu negocio!</p>
-    <a href="#contacto" class="btn"> Solicitar Presupuesto</a>
-  </section>
+<!-- ============ PRELOADER ============ -->
+<div id="preloader">
+  <div class="pre-line mono" id="pre-text">decodificando 01001000 01101111 01101100 01100001</div>
+  <div class="pre-bar"><span></span></div>
+  <div class="pre-pct mono" id="pre-pct">00%</div>
+</div>
 
-  <section id="servicios">
-    <h2>Servicios</h2>
-    <div class="service-card">
-      <h3>Diseño Web</h3>
-      <p> Diseños Web Innovadores y Funcionales adaptados a tus necesidades específicas. ¡Haz que tu negocio se destaque en línea con una página web personalizada y moderna!</p>
+<!-- ============ FONDO ============ -->
+<canvas id="binary-rain"></canvas>
+<div class="grain-overlay"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ============ HEADER ============ -->
+<header>
+  <nav class="nav">
+    <a href="#top" class="logo">CV<span class="cur"></span></a>
+    <ul class="navlinks" id="navlinks">
+      <li><a href="#servicios">servicios</a></li>
+      <li><a href="#proceso">proceso</a></li>
+      <li><a href="#portafolio">portafolio</a></li>
+      <li><a href="#contacto">contacto</a></li>
+    </ul>
+    <a href="#contacto" class="nav-cta">iniciar_proyecto()</a>
+    <div class="burger" id="burger"><span></span><span></span><span></span></div>
+  </nav>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="scanline"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="tag-pill"><span class="dot"></span> disponible para nuevos proyectos</div>
+      <h1>Construyo sitios web que <span class="accent glitch" data-text="no se parecen">no se parecen</span> a ningún otro.</h1>
+      <p class="lead" data-scramble>Soy Caled Vivanco, Ingeniero de Sistemas. Diseño y desarrollo páginas web personales y de negocio, pensadas y construidas a la medida de cada cliente — nada de plantillas genéricas.</p>
+      <div class="hero-actions">
+        <a href="#contacto" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Z"/></svg>
+          Hablemos por WhatsApp
+        </a>
+        <a href="#servicios" class="btn btn-ghost">Ver servicios</a>
+      </div>
     </div>
-    <h4> Optimización SEO</h4>
-    <p>Gracias a la optimización SEO, tu página web tendrá un mayor tráfico de visitantes.</p>
-    <h4>Actualización y Mantenimiento</h4>
-    <p>Hacemos mantenimiento y actualizaciones a gusto para tu página web.</p>
-  </section>
 
-  <section id="portafolio">
-    <h2>Portafolio</h2>
-    <p>Aquí encontrarás algunos de mis trabajos siendo fabricados y otros ya hechos.</p>
-    <div class="slider-container">
-      <div class="slider">
-        <div class="slider-item">
-          <img src="imagenes\Captura de pantalla 2025-01-10 155729.png" alt="Proyecto 1">
-          <h3>Proyecto 1</h3>
+    <div class="term-card">
+      <div class="term-top">
+        <span></span><span></span><span></span>
+        <small>caled@vivanco: ~/portafolio</small>
+      </div>
+      <div class="term-body">
+        <div><span class="ln">$</span><span class="cmd">whoami</span></div>
+        <div class="out">caled_vivanco — ingeniero de sistemas</div>
+        <div><span class="ln">$</span><span class="cmd">cat</span> <span class="path">servicios.txt</span></div>
+        <div class="out">→ páginas web personales<br>→ páginas web de negocio<br>→ landing pages &amp; portafolios<br>→ diseño 100% a la medida</div>
+        <div><span class="ln">$</span> <span id="typed-line"></span><span class="type-cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee-wrap">
+  <div class="marquee" id="marquee">
+    <span><b>&lt;/&gt;</b> HTML5</span>
+    <span><b>#</b> CSS3</span>
+    <span><b>{}</b> JavaScript</span>
+    <span><b>⚛</b> React</span>
+    <span><b>▲</b> Node.js</span>
+    <span><b>⌘</b> UI / UX</span>
+    <span><b>◈</b> Diseño a medida</span>
+    <span><b>⚡</b> Sitios rápidos</span>
+    <span><b>&lt;/&gt;</b> HTML5</span>
+    <span><b>#</b> CSS3</span>
+    <span><b>{}</b> JavaScript</span>
+    <span><b>⚛</b> React</span>
+    <span><b>▲</b> Node.js</span>
+    <span><b>⌘</b> UI / UX</span>
+    <span><b>◈</b> Diseño a medida</span>
+    <span><b>⚡</b> Sitios rápidos</span>
+  </div>
+</div>
+
+<!-- ============ SOBRE MI ============ -->
+<section id="sobre-mi">
+  <div class="wrap">
+    <div class="eyebrow">sobre mí</div>
+    <h2 class="h-title reveal" data-scramble>De la lógica del código a una web que se siente hecha para ti.</h2>
+    <div class="about-grid">
+      <div class="about-card reveal">
+        <div class="row"><span class="k">nombre</span><span class="v">Caled Vivanco</span></div>
+        <div class="row"><span class="k">formación</span><span class="v">Ing. de Sistemas</span></div>
+        <div class="row"><span class="k">enfoque</span><span class="v">Web personal &amp; negocio</span></div>
+        <div class="row"><span class="k">modalidad</span><span class="v">Remoto</span></div>
+        <div class="row"><span class="k">estado</span><span class="v">Disponible</span></div>
+      </div>
+      <div class="about-text reveal">
+        <p>Como <strong>Ingeniero de Sistemas</strong>, me dedico a diseñar y construir sitios web para personas y negocios que quieren algo más que una plantilla: quieren una página que realmente los represente.</p>
+        <p>Cada proyecto empieza escuchando qué necesita tu marca o tu perfil, y termina en un sitio <strong>rápido, responsivo y con identidad propia</strong> — ya sea un portafolio personal, la web de tu negocio o una tienda online.</p>
+        <p>Si tienes una idea, un negocio o simplemente quieres estar en internet con algo que se vea profesional, hablemos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICIOS ============ -->
+<section id="servicios">
+  <div class="wrap">
+    <div class="eyebrow">qué hago</div>
+    <h2 class="h-title reveal" data-scramble>Páginas web para todo tipo de proyecto.</h2>
+    <p class="section-lead reveal">Personales, de negocio, portafolios o tiendas — cada sitio se diseña desde cero según lo que necesitas mostrar.</p>
+
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>
+        <h3>Páginas personales</h3>
+        <p>Portafolio, CV interactivo o presencia en internet para profesionales, creativos y freelancers.</p>
+        <span class="svc-tag">1 a 1 con tu perfil</span>
+      </div>
+      <div class="service-card reveal">
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div>
+        <h3>Páginas de negocio</h3>
+        <p>Sitios corporativos, landing pages y presencia web para pymes y emprendimientos.</p>
+        <span class="svc-tag">enfocado en resultados</span>
+      </div>
+      <div class="service-card reveal">
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <h3>Tiendas &amp; catálogos</h3>
+        <p>Vitrinas online para mostrar y vender tus productos, con contacto directo por WhatsApp.</p>
+        <span class="svc-tag">listo para vender</span>
+      </div>
+      <div class="service-card reveal">
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 3 14h7l-1 8 11-14h-7z"/></svg></div>
+        <h3>Landing pages</h3>
+        <p>Páginas de una sola sección, pensadas para campañas, lanzamientos o eventos puntuales.</p>
+        <span class="svc-tag">rápidas de lanzar</span>
+      </div>
+      <div class="service-card reveal">
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg></div>
+        <h3>Rediseño de sitios</h3>
+        <p>¿Ya tienes una página pero se ve anticuada o no funciona bien? La renuevo de raíz.</p>
+        <span class="svc-tag">mejora completa</span>
+      </div>
+      <div class="service-card reveal">
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+        <h3>Mantenimiento web</h3>
+        <p>Actualizaciones, mejoras y soporte continuo para que tu sitio siga funcionando bien.</p>
+        <span class="svc-tag">acompañamiento</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESO ============ -->
+<section id="proceso">
+  <div class="wrap">
+    <div class="eyebrow">cómo trabajo</div>
+    <h2 class="h-title reveal" data-scramble>Un proceso simple, de la idea al sitio en línea.</h2>
+
+    <div class="process-track reveal" id="processTrack">
+      <div class="process-grid">
+        <div class="process-step">
+          <div class="num">01</div>
+          <h4>Brief &amp; idea</h4>
+          <p>Me cuentas qué necesitas: quién eres, qué haces y qué quieres lograr con tu página.</p>
         </div>
-        <div class="slider-item">
-          <img src="imagenes\Captura de pantalla 2025-01-13 130643.png" alt="Proyecto 2">
-          <h3>Proyecto 2</h3>
+        <div class="process-step">
+          <div class="num">02</div>
+          <h4>Diseño</h4>
+          <p>Propongo una identidad visual única para tu proyecto: colores, tipografía y estructura.</p>
         </div>
-        <div class="slider-item">
-          <img src="imagenes\Captura de pantalla 2025-01-13 135904.png" alt="Proyecto 3">    
-          <h3>Proyecto 3</h3>
+        <div class="process-step">
+          <div class="num">03</div>
+          <h4>Desarrollo</h4>
+          <p>Construyo el sitio con código limpio, animaciones y una experiencia fluida en cualquier dispositivo.</p>
+        </div>
+        <div class="process-step">
+          <div class="num">04</div>
+          <h4>Entrega</h4>
+          <p>Revisamos juntos, ajustamos detalles y tu página queda lista y publicada.</p>
         </div>
       </div>
-      <button class="prev" onclick="moveSlide(-1)">&#10094;</button>
-      <button class="next" onclick="moveSlide(1)">&#10095;</button>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="contacto">
-    <h2>Contacto</h2>
-    <p>¿Listo para trabajar juntos? ¡Hablemos!</p>
-    <div class="social-links">
-      <a href="https://wa.me/573122207263" target="_blank" class="social-link">
-        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" class="social-icon">
-        WhatsApp (+57) 3122207263
-      </a>
-      <a href="https://www.facebook.com/cale.vivanco.7" target="_blank" class="social-link">
-        <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" class="social-icon">
-        Facebook
-      </a>
-      <a href="https://www.instagram.com/caledviv" target="_blank" class="social-link">
-        <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram" class="social-icon">
-        Instagram
-      </a>
+<!-- ============ PORTAFOLIO ============ -->
+<section id="portafolio">
+  <div class="wrap">
+    <div class="eyebrow">portafolio</div>
+    <h2 class="h-title reveal" data-scramble>Algunos proyectos.</h2>
+    <p class="section-lead reveal">Espacio reservado para tus trabajos — reemplaza estas tarjetas con capturas y enlaces reales de tus proyectos.</p>
+
+    <!--
+      GUÍA PARA CALED:
+      Cada tarjeta usa <video> en vez de <img>. Para conectarla:
+      - pon la ruta del video en data-video=""  (ej: data-video="img/proyecto-corralito1.mp4")
+      - añade también:  <source src="img/proyecto-corralito1.mp4" type="video/mp4">
+      - mientras no haya video, se muestra el poster (data-poster) como imagen de portada.
+      Al hacer clic se abre el reproductor (modal) en la misma página — nunca redirige afuera.
+    -->
+    <div class="folio-grid">
+      <div class="folio-card has-img reveal" role="button" tabindex="0"
+           data-video="img/Video Project 4.mp4"
+           data-title="Corralito de Piedra"
+           data-sub="Web de tours · sección Centro Histórico">
+        <video muted loop playsinline preload="metadata" aria-label="Corralito de Piedra — sección Centro Histórico">
+          <source src="img/Video Project 4.mp4" type="video/mp4">
+        </video>
+        <div class="play-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="folio-caption"><b>Corralito de Piedra</b><span>Web de tours · sección Centro Histórico</span></div>
+      </div>
+      <div class="folio-card has-img reveal" role="button" tabindex="0"
+           data-video="img/Video Project 5.mp4"
+           data-title="Corralito de Piedra"
+           data-sub="Web de tours · página de inicio">
+        <video muted loop playsinline preload="metadata" aria-label="Corralito de Piedra — página de inicio">
+          <source src="img/Video Project 5.mp4" type="video/mp4">
+        </video>
+        <div class="play-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="folio-caption"><b>Corralito de Piedra</b><span>Web de tours · página de inicio</span></div>
+      </div>
+      <div class="folio-card has-img reveal" role="button" tabindex="0"
+           data-video="img/Video Project 8.mp4"
+           data-title="Corralito de Piedra"
+           data-sub="Sección alquiler de yates">
+        <video muted loop playsinline preload="metadata" aria-label="Corralito de Piedra — alquiler de yates">
+          <source src="img/Video Project 8.mp4" type="video/mp4">
+        </video>
+        <div class="play-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="folio-caption"><b>Corralito de Piedra</b><span>Sección alquiler de yates</span></div>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <footer>
-    <p>&copy; 2025 Tu Negocio Web | Todos los derechos reservados</p>
-  </footer>
+<!-- ============ MODAL VIDEO ============ -->
+<div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-label="Reproductor de proyecto">
+  <div class="vm-backdrop"></div>
+  <div class="vm-box">
+    <div class="vm-head">
+      <b id="vmTitle">Proyecto</b>
+      <small id="vmSub">reproduciendo</small>
+      <button class="vm-close" id="vmClose" aria-label="Cerrar reproductor">✕</button>
+    </div>
+    <div class="vm-stage">
+      <video id="vmVideo" controls muted playsinline preload="metadata"></video>
+      <div class="vm-fallback" id="vmFallback">
+        <img id="vmPoster" src="" alt="Vista previa del proyecto">
+        <span>Este video aún no está conectado.<br>Añade la ruta en <code>data-video</code> de la tarjeta.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONTACTO ============ -->
+<section id="contacto">
+  <div class="wrap">
+    <div class="eyebrow">contacto</div>
+    <h2 class="h-title reveal" data-scramble>¿Listo para tener tu propio sitio?</h2>
+
+    <div class="contact-wrap reveal">
+      <div class="contact-left">
+        <h3>Hablemos de tu proyecto</h3>
+        <p>Cuéntame qué tipo de página necesitas — personal, de negocio o algo distinto — y te respondo directamente por WhatsApp.</p>
+        <a href="https://wa.me/573122207263?text=Hola%20Caled%2C%20quiero%20una%20p%C3%A1gina%20web" target="_blank" class="whatsapp-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.78 13.98c-.24.68-1.4 1.32-1.93 1.38-.5.06-1.02.28-3.42-.71-2.9-1.2-4.77-4.15-4.92-4.35-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.11 1.02-2.4.26-.28.57-.35.76-.35h.55c.18 0 .42-.03.64.5.24.57.81 1.98.88 2.12.07.14.11.31.02.5-.09.19-.14.31-.28.47-.14.16-.29.36-.42.48-.14.14-.28.29-.12.56.16.28.72 1.2 1.55 1.94 1.06.95 1.96 1.25 2.24 1.39.28.14.44.12.6-.07.16-.19.68-.79.87-1.06.18-.28.36-.23.6-.14.24.09 1.55.73 1.82.87.26.14.44.2.5.32.06.12.06.68-.18 1.36Z"/></svg>
+          +57 312 220 7263
+        </a>
+      </div>
+
+      <div class="social-list">
+        <!-- GUÍA PARA CALED: cambia href="#" por el link real de cada red -->
+        <a href="https://www.instagram.com/caledviv/" class="social-item"><span>Instagram</span><span class="arrow">↗</span></a>
+        <a href="https://www.facebook.com/cale.vivanco.7/" class="social-item"><span>Facebook</span><span class="arrow">↗</span></a>
+        <a href="https://www.linkedin.com/in/caled-vivanco-584b17340/" class="social-item"><span>LinkedIn</span><span class="arrow">↗</span></a>
+        <a href="https://github.com/CaledVivanco" class="social-item"><span>GitHub</span><span class="arrow">↗</span></a>
+        <a href="caledvivancop@gmail.com" class="social-item"><span>tu@correo.com</span><span class="arrow">↗</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap footer-row">
+    <p class="mono">© <span id="year"></span> Caled Vivanco — Ingeniero de Sistemas</p>
+    <p class="mono">diseñado &amp; construido a mano, línea por línea</p>
+  </div>
+</footer>
+
+<!-- ============ WHATSAPP FLOTANTE ============ -->
+<a href="https://wa.me/573122207263?text=Hola%20Caled%2C%20quiero%20una%20p%C3%A1gina%20web" target="_blank" class="float-wa" aria-label="Escribir por WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.78 13.98c-.24.68-1.4 1.32-1.93 1.38-.5.06-1.02.28-3.42-.71-2.9-1.2-4.77-4.15-4.92-4.35-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.11 1.02-2.4.26-.28.57-.35.76-.35h.55c.18 0 .42-.03.64.5.24.57.81 1.98.88 2.12.07.14.11.31.02.5-.09.19-.14.31-.28.47-.14.16-.29.36-.42.48-.14.14-.28.29-.12.56.16.28.72 1.2 1.55 1.94 1.06.95 1.96 1.25 2.24 1.39.28.14.44.12.6-.07.16-.19.68-.79.87-1.06.18-.28.36-.23.6-.14.24.09 1.55.73 1.82.87.26.14.44.2.5.32.06.12.06.68-.18 1.36Z"/></svg>
+</a>
+
+<script>
+/* ============================================================
+   1) CASCADA DE NÚMEROS BINARIOS (canvas)
+   ============================================================ */
+(function(){
+  const canvas = document.getElementById('binary-rain');
+  const ctx = canvas.getContext('2d');
+  let w, h, cols, drops, fontSize = 15;
+  let mouseX = -9999, mouseY = -9999;
+
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    cols = Math.floor(w / fontSize);
+    drops = new Array(cols).fill(0).map(()=> Math.random() * -100);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  window.addEventListener('mousemove', (e)=>{
+    mouseX = e.clientX; mouseY = e.clientY;
+  }, { passive:true });
+
+  const colors = ['#8b6bff', '#22d3c0'];
+
+  function draw(){
+    ctx.fillStyle = 'rgba(9,12,17,0.16)';
+    ctx.fillRect(0,0,w,h);
+    ctx.font = fontSize + 'px "Space Mono", monospace';
+
+    for(let i=0;i<cols;i++){
+      const char = Math.random() > 0.5 ? '1' : '0';
+      const x = i * fontSize;
+      const y = drops[i] * fontSize;
+
+      const dx = x - mouseX;
+      const dy = y - mouseY;
+      const dist = Math.hypot(dx, dy);
+      const boost = dist < 170 ? (1 - dist / 170) * 9 : 0;
+
+      const isBright = Math.random() < 0.02;
+      ctx.fillStyle = isBright ? '#ffb454' : (boost > 0 ? '#ffffff' : colors[i % 2]);
+      ctx.globalAlpha = isBright ? 0.9 : (boost > 0 ? 0.95 : 0.55);
+      ctx.fillText(char, x, y);
+      ctx.globalAlpha = 1;
+
+      if(y > h && Math.random() > 0.975){ drops[i] = 0; }
+      drops[i] += 1 + boost;
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ============================================================
+   2) GLOW QUE SIGUE AL CURSOR
+   ============================================================ */
+(function(){
+  const glow = document.getElementById('cursorGlow');
+  if(window.matchMedia('(pointer: coarse)').matches){ glow.style.display='none'; return; }
+  window.addEventListener('mousemove', (e)=>{
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  });
+})();
+
+/* ============================================================
+   3) PRELOADER
+   ============================================================ */
+window.addEventListener('load', ()=>{
+  const pre = document.getElementById('preloader');
+  const pct = document.getElementById('pre-pct');
+  let n = 0;
+  const timer = setInterval(()=>{
+    n = Math.min(100, n + Math.floor(Math.random() * 9) + 3);
+    pct.textContent = String(n).padStart(2, '0') + '%';
+    if(n >= 100){ clearInterval(timer); }
+  }, 55);
+  setTimeout(()=>{ pre.classList.add('hide'); }, 1000);
+});
+
+/* ============================================================
+   4) EFECTO "TYPING" EN LA TERMINAL DEL HERO
+   ============================================================ */
+(function(){
+  const el = document.getElementById('typed-line');
+  const phrases = [
+    'iniciar_proyecto --contigo',
+    'crear-pagina-web --tipo=negocio --unico=true',
+    'echo "hagamos algo distinto"'
+  ];
+  let p = 0, i = 0, deleting = false;
+
+  function tick(){
+    const current = phrases[p];
+    if(!deleting){
+      el.textContent = current.slice(0, i+1);
+      i++;
+      if(i === current.length){ deleting = true; setTimeout(tick, 1400); return; }
+    } else {
+      el.textContent = current.slice(0, i-1);
+      i--;
+      if(i === 0){ deleting = false; p = (p+1) % phrases.length; }
+    }
+    setTimeout(tick, deleting ? 35 : 55);
+  }
+  setTimeout(tick, 1600);
+})();
+
+/* ============================================================
+   5) REVEAL AL HACER SCROLL
+   ============================================================ */
+(function(){
+  const items = document.querySelectorAll('.reveal, #processTrack');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  items.forEach(el=> io.observe(el));
+})();
+
+/* ============================================================
+   6) MENÚ MÓVIL
+   ============================================================ */
+(function(){
+  const burger = document.getElementById('burger');
+  const nav = document.getElementById('navlinks');
+  burger.addEventListener('click', ()=>{
+    nav.classList.toggle('open');
+    burger.classList.toggle('open');
+  });
+  nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> nav.classList.remove('open')));
+})();
+
+/* ============================================================
+   7) AÑO EN FOOTER
+   ============================================================ */
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ============================================================
+   8) BARRA DE PROGRESO DE SCROLL
+   ============================================================ */
+(function(){
+  const bar = document.getElementById('scroll-progress');
+  const onScroll = ()=>{
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  window.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+})();
+
+/* ============================================================
+   9) CURSOR CUSTOM — punto rígido + anillo con lerp (trailing)
+   ============================================================ */
+(function(){
+  if(!window.matchMedia('(pointer: fine)').matches) return;
+  document.body.classList.add('cursor-hidden');
+  const dot  = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  window.addEventListener('mousemove', (e)=>{
+    mx = e.clientX; my = e.clientY;
+    dot.style.opacity = 1; ring.style.opacity = 1;
+    dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  }, { passive:true });
+
+  (function follow(){
+    rx += (mx - rx) * 0.16;
+    ry += (my - ry) * 0.16;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(follow);
+  })();
+
+  const interactives = 'a, button, [role="button"], .folio-card.has-img, .service-card, .whatsapp-btn, .nav-cta, .tag-pill';
+  document.querySelectorAll(interactives).forEach(el=>{
+    el.addEventListener('mouseenter', ()=> ring.classList.add('is-hovering'));
+    el.addEventListener('mouseleave', ()=> ring.classList.remove('is-hovering'));
+  });
+  document.addEventListener('mouseleave', ()=>{ dot.style.opacity = 0; ring.style.opacity = 0; });
+})();
+
+/* ============================================================
+   10) EFECTO MAGNÉTICO EN BOTONES
+   ============================================================ */
+(function(){
+  if(!window.matchMedia('(pointer: fine)').matches) return;
+  const els = document.querySelectorAll('.btn, .whatsapp-btn, .nav-cta');
+  els.forEach(el=>{
+    el.addEventListener('mousemove', (e)=>{
+      const r = el.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width  / 2;
+      const y = e.clientY - r.top  - r.height / 2;
+      el.style.transition = 'transform .12s ease';
+      el.style.transform = 'translate(' + (x * 0.16) + 'px, ' + (y * 0.22) + 'px)';
+    });
+    el.addEventListener('mouseleave', ()=>{
+      el.style.transition = 'transform .45s cubic-bezier(.2,.7,.3,1.3)';
+      el.style.transform = '';
+    });
+  });
+})();
+
+/* ============================================================
+   11) TILT 3D + SPOTLIGHT en tarjetas
+   ============================================================ */
+(function(){
+  if(!window.matchMedia('(pointer: fine)').matches) return;
+  const cards = document.querySelectorAll('.service-card, .folio-card.has-img');
+  cards.forEach(card=>{
+    card.addEventListener('mousemove', (e)=>{
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top)  / r.height;
+      card.style.setProperty('--mx', (px * 100) + '%');
+      card.style.setProperty('--my', (py * 100) + '%');
+      const rx = (0.5 - py) * 9;
+      const ry = (px - 0.5) * 9;
+      card.style.transform = 'perspective(850px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateY(-6px)';
+    });
+    card.addEventListener('mouseleave', ()=>{ card.style.transform = ''; });
+  });
+})();
+
+/* ============================================================
+   12) ONDA (RIPPLE) AL HACER CLIC
+   ============================================================ */
+(function(){
+  const els = document.querySelectorAll('.btn, .whatsapp-btn');
+  els.forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const r = btn.getBoundingClientRect();
+      const d = Math.max(r.width, r.height);
+      const span = document.createElement('span');
+      span.className = 'ripple';
+      span.style.width = span.style.height = d + 'px';
+      span.style.left = (e.clientX - r.left - d / 2) + 'px';
+      span.style.top  = (e.clientY - r.top  - d / 2) + 'px';
+      btn.appendChild(span);
+      setTimeout(()=> span.remove(), 700);
+    });
+  });
+})();
+
+/* ============================================================
+   13) TEXTO SCRAMBLE / DECODIFICADO (filosofía "compilador")
+   ============================================================ */
+(function(){
+  const pool = '!<>-_\\/[]{}—=+*^?#01';
+  function scramble(el){
+    const original = el.dataset.original || el.textContent;
+    el.dataset.original = original;
+    const len = original.length;
+    const frames = 24;
+    let frame = 0;
+    const timer = setInterval(()=>{
+      frame++;
+      let out = '';
+      for(let i = 0; i < len; i++){
+        const c = original[i];
+        if(c === ' ' || frame >= frames) out += c;
+        else if(i < frame * (len / frames)) out += c;
+        else out += pool[Math.floor(Math.random() * pool.length)];
+      }
+      el.textContent = out;
+      if(frame >= frames){
+        clearInterval(timer);
+        el.textContent = original;
+      }
+    }, 42);
+  }
+  const targets = document.querySelectorAll('[data-scramble]');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){ scramble(entry.target); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.5 });
+  targets.forEach(el=> io.observe(el));
+})();
+
+/* ============================================================
+   14) PORTAFOLIO — video en hover + modal reproductor
+   ============================================================ */
+(function(){
+  const modal   = document.getElementById('videoModal');
+  const vmVideo = document.getElementById('vmVideo');
+  const vmTitle = document.getElementById('vmTitle');
+  const vmSub   = document.getElementById('vmSub');
+  const vmPoster = document.getElementById('vmPoster');
+  const vmFall  = document.getElementById('vmFallback');
+  const closeBtn = document.getElementById('vmClose');
+
+  const cards = document.querySelectorAll('.folio-card.has-img');
+
+  function open(card){
+    const src    = card.dataset.video;
+    const poster = card.dataset.poster;
+    vmTitle.textContent = card.dataset.title;
+    vmSub.textContent   = card.dataset.sub;
+    if(poster){ vmPoster.src = poster; }
+    if(src){
+      vmFall.style.display = 'none';
+      vmVideo.style.display = 'block';
+      vmVideo.src = src;
+      if(poster){ vmVideo.poster = poster; } else { vmVideo.removeAttribute('poster'); }
+      vmVideo.muted = true;
+      vmVideo.load();
+      vmVideo.play().catch(()=>{});
+    } else {
+      vmVideo.pause();
+      vmVideo.removeAttribute('src');
+      vmVideo.style.display = 'none';
+      vmFall.style.display = 'flex';
+    }
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function close(){
+    modal.classList.remove('open');
+    vmVideo.pause();
+    vmVideo.removeAttribute('src');
+    vmVideo.load();
+    document.body.style.overflow = '';
+  }
+
+  cards.forEach(card=>{
+    card.addEventListener('click', ()=> open(card));
+    card.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(card); }
+    });
+    const v = card.querySelector('video');
+    if(v){
+      card.addEventListener('mouseenter', ()=>{
+        if(window.matchMedia('(pointer: fine)').matches){
+          v.muted = true;
+          const p = v.play();
+          if(p) p.catch(()=>{});
+        }
+      });
+      card.addEventListener('mouseleave', ()=>{ v.pause(); try{ v.currentTime = 0; }catch(e){} });
+    }
+  });
+
+  closeBtn.addEventListener('click', close);
+  modal.querySelector('.vm-backdrop').addEventListener('click', close);
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
+})();
+
+/* ============================================================
+   15) NAV — resaltar sección activa al hacer scroll
+   ============================================================ */
+(function(){
+  const links = document.querySelectorAll('.navlinks a');
+  const map = {};
+  links.forEach(a=>{
+    const id = a.getAttribute('href').slice(1);
+    const sec = document.getElementById(id);
+    if(sec) map[id] = sec;
+  });
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        links.forEach(a=> a.style.color = '');
+        const active = document.querySelector('.navlinks a[href="#' + entry.target.id + '"]');
+        if(active) active.style.color = 'var(--accent-2)';
+      }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  Object.values(map).forEach(sec=> io.observe(sec));
+})();
+</script>
 </body>
 </html>
